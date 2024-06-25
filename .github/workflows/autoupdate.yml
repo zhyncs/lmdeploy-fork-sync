@@ -1,0 +1,28 @@
+name: autoupdate
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  update-main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: all in one
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+        run: |
+          echo "sync InternLM/lmdeploy main branch"
+          git clone --single-branch https://github.com/zhyncs/lmdeploy
+          pushd lmdeploy
+          git remote set-url origin https://github.com/InternLM/lmdeploy
+          git pull
+          git remote set-url origin https://$GITHUB_TOKEN@github.com/zhyncs/lmdeploy
+          git config --local user.name zhyncs && git config --local user.email me@zhyncs.com && git push
